@@ -30,6 +30,10 @@ public class Memory {
         return sb.toString();
     }
     
+    public String getBinary(short k) {
+        return Integer.toBinaryString((memory[k] & 0xFF) + 0x100).substring(1);
+    }
+    
     //font initialization
     //fonts are stored in memory from 0x50 to 0x9F (80 to 159)
     

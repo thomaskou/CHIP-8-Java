@@ -18,6 +18,10 @@ public class Display {
         gfx[x][y] = i;
     }
     
+    public byte[][] getGfx() {
+        return gfx;
+    }
+    
     public void displayClear() {
         for (byte[] x : gfx)
             for (byte y : x)
