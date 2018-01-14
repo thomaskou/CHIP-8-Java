@@ -16,25 +16,41 @@ public class Game {
     public Display gfx = new Display();    //byte, 64x32
     public Input input = new Input();      //byte, 0-15
     
+    //temporary
+    private int pctemp;
+    
     public Game(String game) {
+        
+        try {
+            byte[] data = new Reader().romToByteArray(game);
+            for (int k = 0x00; k < data.length; k++) {
+                memory.set(k + 0x200, data[k]);
+            }
+        } catch (Exception e) {
+            System.out.println("File not found.");
+            for (;;) {}
+        }
+        
         pc = 0x200;
         opcode = "0000";
         I = 0;
         stack.setP( (short)0x0000 );
-        //System.out.println(pc);
+        
     }
     
     //methods
     
     public void cycle() {
         
-        //DON'T TOUCH THIS IT WORKS FOR SOME REASON
-        int pctemp = pc;
-        
         //get opcode (opcodes are 2 bytes; must be concantenated)
         String mem1 = memory.getHex( (short)(pc) );
         String mem2 = memory.getHex( (short)(pc + 1) );
         opcode = mem1 + mem2;
+        
+        //print before
+        System.out.println("opcode: " + opcode);
+        //System.out.println("I: " + I);
+        //System.out.println("pc: " + pc);
         
         //decode opcode
         // <editor-fold defaultstate="collapsed" desc="switch statements">
@@ -88,13 +104,13 @@ public class Game {
         }
         // </editor-fold>
         
-        //DON'T TOUCH THIS IT WORKS FOR SOME REASON
+        //HACKY WORKAROUND
         pc = pctemp;
         
         //decrement timers
         timers.decrement();
         
-        //print
+        //print after
         //System.out.println("opcode: " + opcode);
         //System.out.println("I: " + I);
         //System.out.println("pc: " + pc);
@@ -109,21 +125,26 @@ public class Game {
     
     private void opDisplayClear() {
         gfx.displayClear();
+        pc += 2;
+        pctemp = pc;
     }
     
     private void opReturn() {
         pc = stack.get(stack.getP());
         stack.down();
+        pctemp = pc;
     }
     
     private void opGoto() {
         pc = Integer.parseInt(opcode.substring(1), 16);
+        pctemp = pc;
     }
     
     private void opCall() {
         stack.set(stack.getP(), pc);
         stack.up();
         pc = Integer.parseInt(opcode.substring(1), 16);
+        pctemp = pc;
     }
     
     private void opCondTrue() {
@@ -134,6 +155,7 @@ public class Game {
             pc += 4;
         else
             pc += 2;
+        pctemp = pc;
     }
     
     private void opCondFalse() {
@@ -144,6 +166,7 @@ public class Game {
             pc += 2;
         else
             pc += 4;
+        pctemp = pc;
     }
     
     private void opCondRegTrue() {
@@ -155,6 +178,7 @@ public class Game {
             pc += 4;
         else
             pc += 2;
+        pctemp = pc;
     }
     
     private void opConstSet() {
@@ -162,6 +186,7 @@ public class Game {
         byte nn = Byte.parseByte(opcode.substring(2), 16);
         V.set(x, nn);
         pc += 2;
+        pctemp = pc;
     }
     
     private void opConstAdd() {
@@ -174,6 +199,7 @@ public class Game {
         else
             V.set(x, sum);
         pc += 2;
+        pctemp = pc;
     }
     
     private void opAssign() {
@@ -182,6 +208,7 @@ public class Game {
         int vy = V.get(y);
         V.set(x, vy);
         pc += 2;
+        pctemp = pc;
     }
     
     private void opBitOr() {
@@ -191,6 +218,7 @@ public class Game {
         int vy = V.get(y);
         V.set(x, vx|vy);
         pc += 2;
+        pctemp = pc;
     }
     
     private void opBitAnd() {
@@ -200,6 +228,7 @@ public class Game {
         int vy = V.get(y);
         V.set(x, vx&vy);
         pc += 2;
+        pctemp = pc;
     }
     
     private void opBitXor() {
@@ -209,6 +238,7 @@ public class Game {
         int vy = V.get(y);
         V.set(x, vx^vy);
         pc += 2;
+        pctemp = pc;
     }
     
     private void opMathAdd() {
@@ -226,6 +256,7 @@ public class Game {
             V.set(15, 0);
         }
         pc += 2;
+        pctemp = pc;
     }
     
     private void opMathSubtract() {
@@ -243,6 +274,7 @@ public class Game {
             V.set(15, 0);
         }
         pc += 2;
+        pctemp = pc;
     }
     
     private void opBitRight() {
@@ -254,6 +286,7 @@ public class Game {
         V.set(x, vy);
         V.set(y, vy);
         pc += 2;
+        pctemp = pc;
     }
     
     private void opMathDiff() {
@@ -271,6 +304,7 @@ public class Game {
             V.set(15, 0);
         }
         pc += 2;
+        pctemp = pc;
     }
     
     private void opBitLeft() {
@@ -282,6 +316,7 @@ public class Game {
         V.set(x, vy);
         V.set(y, vy);
         pc += 2;
+        pctemp = pc;
     }
     
     private void opCondRegFalse() {
@@ -293,17 +328,20 @@ public class Game {
             pc += 2;
         else
             pc += 4;
+        pctemp = pc;
     }
     
     private void opSetI() {
         int nnn = Integer.parseInt(opcode.substring(1), 16);
         I = nnn;
         pc += 2;
+        pctemp = pc;
     }
     
     private void opGotoAdd() {
         int nnn = Integer.parseInt(opcode.substring(1), 16);
         pc = nnn + (int)(V.get(0));
+        pctemp = pc;
     }
     
     private void opRand() {
@@ -312,6 +350,7 @@ public class Game {
         int nn = Integer.parseInt(opcode.substring(2), 16);
         V.set(x, rand&nn);
         pc += 2;
+        pctemp = pc;
     }
     
     private void opDraw() {
@@ -323,7 +362,7 @@ public class Game {
         int n = Integer.parseInt(opcode.substring(3), 16);
         
         for (int r = 0; r < n; r++) {
-            String row = memory.getHex((short)(I + r));
+            String row = memory.getBinary((short)(I + r));
             for (int c = 0; c < 8; c++) {
                 byte current = gfx.get(vx + c, vy + r);
                 byte pixel = Integer.valueOf(row.substring(c, c+1)).byteValue();
@@ -345,6 +384,7 @@ public class Game {
         
         drawFlag = true;
         pc += 2;
+        pctemp = pc;
     }
     
     private void opKeyTrue() {
@@ -352,6 +392,7 @@ public class Game {
         int vx = V.get(x);
         if (input.get(vx) != 0) pc += 4;
         else pc += 2;
+        pctemp = pc;
     }
     
     private void opKeyFalse() {
@@ -359,12 +400,14 @@ public class Game {
         int vx = V.get(x);
         if (input.get(vx) != 0) pc += 2;
         else pc += 4;
+        pctemp = pc;
     }
     
     private void opGetDelay() {
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         V.set(x, timers.getDelay());
         pc += 2;
+        pctemp = pc;
     }
     
     private void opGetKey() {
@@ -374,6 +417,7 @@ public class Game {
                 if (input.get(k) != 0) {
                     V.set(x, k);
                     pc += 2;
+                    pctemp = pc;
                     return;
                 }
             }
@@ -385,6 +429,7 @@ public class Game {
         int vx = V.get(x);
         timers.setDelay(vx);
         pc += 2;
+        pctemp = pc;
     }
     
     private void opSetSound() {
@@ -392,6 +437,7 @@ public class Game {
         int vx = V.get(x);
         timers.setSound(vx);
         pc += 2;
+        pctemp = pc;
     }
     
     private void opAddIReg() {
@@ -399,6 +445,7 @@ public class Game {
         int vx = V.get(x);
         I += vx;
         pc += 2;
+        pctemp = pc;
     }
     
     private void opGetChar() {
@@ -423,6 +470,7 @@ public class Game {
             case 0xF : I = 155;
         }
         pc += 2;
+        pctemp = pc;
     }
     
     private void opStoreBinary() {
@@ -432,6 +480,7 @@ public class Game {
         memory.set(I+1, (byte)((vx / 10 ) % 10));
         memory.set(I+2, (byte)((vx % 100) % 10));
         pc += 2;
+        pctemp = pc;
     }
     
     private void opRegDump() {
@@ -442,6 +491,7 @@ public class Game {
             I++;
         }
         pc += 2;
+        pctemp = pc;
     }
     
     private void opRegLoad() {
@@ -452,6 +502,7 @@ public class Game {
             I++;
         }
         pc += 2;
+        pctemp = pc;
     }
     
 }
