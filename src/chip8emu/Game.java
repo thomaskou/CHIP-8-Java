@@ -16,8 +16,9 @@ public class Game {
     public Display gfx = new Display();    //byte, 64x32
     public Input input = new Input();      //byte, 0-15
     
-    //temporary
+    //hacks
     private int pctemp;
+    private PCHack pchack = new PCHack();
     
     public Game(String game) {
         
@@ -48,7 +49,7 @@ public class Game {
         opcode = mem1 + mem2;
         
         //print before
-        System.out.println("opcode: " + opcode);
+        //System.out.println("opcode: " + opcode);
         //System.out.println("I: " + I);
         //System.out.println("pc: " + pc);
         
@@ -105,7 +106,11 @@ public class Game {
         // </editor-fold>
         
         //HACKY WORKAROUND
+        //System.out.println("pctemp: " + pctemp);
         pc = pctemp;
+        if (pchack.checkFlag()) {
+            pc = pchack.get();
+        }
         
         //decrement timers
         timers.decrement();
@@ -113,6 +118,7 @@ public class Game {
         //print after
         //System.out.println("opcode: " + opcode);
         //System.out.println("I: " + I);
+        //System.out.println("pctemp: " + pctemp);
         //System.out.println("pc: " + pc);
         
     }
@@ -123,31 +129,34 @@ public class Game {
     
     //opcodes
     
-    private void opDisplayClear() {
+    private void opDisplayClear() { //00E0
         gfx.displayClear();
         pc += 2;
         pctemp = pc;
     }
     
-    private void opReturn() {
-        pc = stack.get(stack.getP());
+    private void opReturn() { //00EE
+        //System.out.println("RETURN TO: " + (stack.get(stack.getP() - 1)));
+        pc = stack.get(stack.getP() - 1);
         stack.down();
         pctemp = pc;
+        pchack.set(pc);
+        //System.out.println("pctemp: " + pctemp);
     }
     
-    private void opGoto() {
+    private void opGoto() { //1NNN
         pc = Integer.parseInt(opcode.substring(1), 16);
         pctemp = pc;
     }
     
-    private void opCall() {
-        stack.set(stack.getP(), pc);
+    private void opCall() { //2NNN
+        stack.set(stack.getP(), pc + 2);
         stack.up();
         pc = Integer.parseInt(opcode.substring(1), 16);
         pctemp = pc;
     }
     
-    private void opCondTrue() {
+    private void opCondTrue() { //3XNN
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
         int nn = Integer.parseInt(opcode.substring(2), 16);
@@ -158,7 +167,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opCondFalse() {
+    private void opCondFalse() { //4XNN
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
         int nn = Integer.parseInt(opcode.substring(2), 16);
@@ -169,7 +178,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opCondRegTrue() {
+    private void opCondRegTrue() { //5XY0
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
         int y = Integer.parseInt(opcode.substring(2,3), 16);
@@ -181,18 +190,20 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opConstSet() {
+    private void opConstSet() { //6XNN
         int x = Integer.parseInt(opcode.substring(1,2), 16);
-        byte nn = Byte.parseByte(opcode.substring(2), 16);
-        V.set(x, nn);
+        //byte nn = Byte.parseByte(opcode.substring(2), 16);
+        int nn = Integer.parseInt(opcode.substring(2), 16);
+        V.set(x, (int)nn);
         pc += 2;
         pctemp = pc;
     }
     
-    private void opConstAdd() {
+    private void opConstAdd() { //7XNN
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
-        int nn = Byte.parseByte(opcode.substring(2), 16);
+        //int nn = Byte.parseByte(opcode.substring(2), 16);
+        int nn = Integer.parseInt(opcode.substring(2), 16);
         int sum = vx + nn;
         if (sum > 0xFF)
             V.set(x, 0xFF);
@@ -202,7 +213,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opAssign() {
+    private void opAssign() { //8XY0
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int y = Integer.parseInt(opcode.substring(2,3), 16);
         int vy = V.get(y);
@@ -211,7 +222,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opBitOr() {
+    private void opBitOr() { //8XY1
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
         int y = Integer.parseInt(opcode.substring(2,3), 16);
@@ -221,7 +232,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opBitAnd() {
+    private void opBitAnd() { //8XY2
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
         int y = Integer.parseInt(opcode.substring(2,3), 16);
@@ -229,9 +240,10 @@ public class Game {
         V.set(x, vx&vy);
         pc += 2;
         pctemp = pc;
+        pchack.set(pc);
     }
     
-    private void opBitXor() {
+    private void opBitXor() { //8XY3
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
         int y = Integer.parseInt(opcode.substring(2,3), 16);
@@ -241,7 +253,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opMathAdd() {
+    private void opMathAdd() { //8XY4
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
         int y = Integer.parseInt(opcode.substring(2,3), 16);
@@ -257,9 +269,10 @@ public class Game {
         }
         pc += 2;
         pctemp = pc;
+        pchack.set(pc);
     }
     
-    private void opMathSubtract() {
+    private void opMathSubtract() { //8XY5
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
         int y = Integer.parseInt(opcode.substring(2,3), 16);
@@ -277,7 +290,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opBitRight() {
+    private void opBitRight() { //8XY6
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int y = Integer.parseInt(opcode.substring(2,3), 16);
         byte vy = (byte)(V.get(y));
@@ -289,7 +302,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opMathDiff() {
+    private void opMathDiff() { //8XY7
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
         int y = Integer.parseInt(opcode.substring(2,3), 16);
@@ -307,7 +320,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opBitLeft() {
+    private void opBitLeft() { //8XYE
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int y = Integer.parseInt(opcode.substring(2,3), 16);
         byte vy = (byte)(V.get(y));
@@ -319,7 +332,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opCondRegFalse() {
+    private void opCondRegFalse() { //9XY0
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
         int y = Integer.parseInt(opcode.substring(2,3), 16);
@@ -331,20 +344,20 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opSetI() {
+    private void opSetI() { //ANNN
         int nnn = Integer.parseInt(opcode.substring(1), 16);
         I = nnn;
         pc += 2;
         pctemp = pc;
     }
     
-    private void opGotoAdd() {
+    private void opGotoAdd() { //BNNN
         int nnn = Integer.parseInt(opcode.substring(1), 16);
         pc = nnn + (int)(V.get(0));
         pctemp = pc;
     }
     
-    private void opRand() {
+    private void opRand() { //CXNN
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int rand = (int)( Math.floor( Math.random()*256 ) );
         int nn = Integer.parseInt(opcode.substring(2), 16);
@@ -353,7 +366,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opDraw() {
+    private void opDraw() { //DXYN
         V.set(15, 0);
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
@@ -364,6 +377,8 @@ public class Game {
         for (int r = 0; r < n; r++) {
             String row = memory.getBinary((short)(I + r));
             for (int c = 0; c < 8; c++) {
+                if (vx + c > 63) break;
+                if (vy + r > 31) break;
                 byte current = gfx.get(vx + c, vy + r);
                 byte pixel = Integer.valueOf(row.substring(c, c+1)).byteValue();
                 if (current == 0) {
@@ -387,7 +402,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opKeyTrue() {
+    private void opKeyTrue() { //EX9E
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
         if (input.get(vx) != 0) pc += 4;
@@ -395,7 +410,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opKeyFalse() {
+    private void opKeyFalse() { //EXA1
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
         if (input.get(vx) != 0) pc += 2;
@@ -403,14 +418,14 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opGetDelay() {
+    private void opGetDelay() { //FX07
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         V.set(x, timers.getDelay());
-        pc += 2;
+        //pc += 2;
         pctemp = pc;
     }
     
-    private void opGetKey() {
+    private void opGetKey() { //FX0A
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         for (;;) {
             for (int k = 0; k < 16; k++) {
@@ -424,7 +439,7 @@ public class Game {
         }
     }
     
-    private void opSetDelay() {
+    private void opSetDelay() { //FX15
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
         timers.setDelay(vx);
@@ -432,7 +447,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opSetSound() {
+    private void opSetSound() { //FX18
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
         timers.setSound(vx);
@@ -440,7 +455,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opAddIReg() {
+    private void opAddIReg() { //FX1E
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
         I += vx;
@@ -448,7 +463,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opGetChar() {
+    private void opGetChar() { //FX29
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         int vx = V.get(x);
         switch (vx) {
@@ -473,7 +488,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opStoreBinary() {
+    private void opStoreBinary() { //FX33
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         byte vx = (byte)((byte)(V.get(x)) >>> 8);
         memory.set(I,   (byte)((vx / 100)     ));
@@ -483,7 +498,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opRegDump() {
+    private void opRegDump() { //FX55
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         for (int k = 0; k < x; k++) {
             byte vx = (byte)(V.get(k));
@@ -494,7 +509,7 @@ public class Game {
         pctemp = pc;
     }
     
-    private void opRegLoad() {
+    private void opRegLoad() { //FX65
         int x = Integer.parseInt(opcode.substring(1,2), 16);
         for (int k = 0; k < x; k++) {
             byte memx = (byte)(memory.get(I));

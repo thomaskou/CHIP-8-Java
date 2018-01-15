@@ -3,6 +3,8 @@ package chip8emu;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class chip8emu {
     
@@ -10,6 +12,10 @@ public class chip8emu {
     static byte[][] gfx;
     static Game game;
     static JFrame f = new JFrame("CHIP-8 Emulator");
+    
+    //timers
+    //static Timer timer;
+    //static Countdown task;
 
     public static void main(String[] args) {
         
@@ -20,17 +26,27 @@ public class chip8emu {
             for (byte y : x)
                 y = 0;
         
-        //INITIAL DRAW
-        p = new Panel(gfx);
-        f.add(p);
-        f.setSize(2586,1350); //2560x1280
-        f.setVisible(true);
+        //TIMERS
+        //timer = new Timer();
+        //task = new Countdown();
+        //timer.scheduleAtFixedRate(task, 1, 1);
         
         //GAME INITIALIZATION
-        game = new Game("PONG");
+        game = new Game("INVADERS");
+        
+        //INITIAL DRAW
+        p = new Panel(game.gfx);
+        f.setSize(2586,1350); //2560x1280
+        f.setVisible(true);
+        f.add(p);
         
         //EMULATION LOOP
         for (;;) {
+            /*if (task.check()) {
+                game.cycle();
+                if (game.drawFlag) draw();
+                game.setKeys();
+            }*/
             game.cycle();
             if (game.drawFlag) draw();
             game.setKeys();
@@ -40,10 +56,9 @@ public class chip8emu {
     
     public static void draw() {
         gfx = game.gfx.getGfx();
-        f.remove(p);
-        p = new Panel(gfx);
-        f.add(p);
         game.drawFlag = false;
+        f.repaint();
+        //System.out.println("draw!");
     }
     
 }

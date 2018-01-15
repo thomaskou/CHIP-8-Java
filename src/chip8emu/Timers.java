@@ -1,13 +1,21 @@
 package chip8emu;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class Timers {
     
     private int delay; //delay timer
     private int sound; //sound timer
+    private Timer timer;
+    private Countdown task;
     
     public Timers() {
         delay = 0;
         sound = 0;
+        timer = new Timer();
+        task = new Countdown();
+        timer.scheduleAtFixedRate(task, 1, 1);
     }
     
     //methods
@@ -29,10 +37,16 @@ public class Timers {
     }
     
     public void decrement() {
-        if (delay > 0)
+        if (task.check()) {
+            if (delay > 0)
+                delay--;
+            if (sound > 0)
+                sound--;
+        }
+        /*if (delay > 0)
             delay--;
         if (sound > 0)
-            sound--;
+            sound--;*/
     }
     
 }
