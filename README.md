@@ -7,6 +7,8 @@ This is the first thing I've ever done relating to emulation, so this project al
 
 <img src="https://i.imgur.com/TavYjkX.png" width="256"> <img src="https://i.imgur.com/OgwUSlf.png" width="256"> <img src="https://i.imgur.com/trnM76x.png" width="256"> <img src="https://i.imgur.com/Gr3BkVG.png" width="256"> <img src="https://i.imgur.com/yXI9xih.png" width="256">
 
+***Games pictured in order:*** PONG, BREAKOUT, BRIX, INVADERS, CONNECT4
+
 This being my first emulation project, do not expect it to be 100% functional. The following list explains what still needs to be fixed or implemented.
 
 **THINGS TO WORK ON:**
