@@ -45,6 +45,7 @@ This being my first emulation project, do not expect it to be 100% functional. T
 * Opcodes and how a CPU interprets and executes instructions from memory.
 * Reading files as hexadecimal in Java.
 * Rendering and updating graphics live using JPanel and JFrame.
+* How to use GitHub!
 
 **WHAT COULD BE IMPROVED NEXT TIME:**
 * Use a different language, such as C, that plays nicer with bytes, shorts, and other variable types.
