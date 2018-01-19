@@ -1,7 +1,7 @@
 # CHIP-8-Java
-CHIP-8 Emulator in Java
+*CHIP-8 Emulator in Java*
 
-A heavily broken WIP low-level emulator/interpreter for the CHIP-8 programming language / instruction set, created in Java.
+A heavily broken WIP low-level emulator/interpreter for the CHIP-8 programming language / instruction set, programmed in Java.
 
 This is the first thing I've ever done relating to emulation, so this project also serves as a hands-on learning experience for me. I've learned enough such that I'm confident in taking on more complex emulation projects. However, I also realize in retrospect that I've made many beginner mistakes within this project.
 
