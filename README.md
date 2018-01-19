@@ -5,9 +5,18 @@ A *very WIP* low-level emulator/interpreter for the CHIP-8 programming language 
 
 This is the first thing I've ever done relating to emulation, so this project also serves as a hands-on learning experience for me. I've learned enough such that I'm confident in taking on more complex emulation projects. However, I also realize in retrospect that I've made many beginner mistakes within this project.
 
+***
+
+### Images
+*Updated Jan. 18, 2018*
+
 <img src="https://i.imgur.com/TavYjkX.png" width="256"> <img src="https://i.imgur.com/OgwUSlf.png" width="256"> <img src="https://i.imgur.com/trnM76x.png" width="256"> <img src="https://i.imgur.com/Gr3BkVG.png" width="256"> <img src="https://i.imgur.com/yXI9xih.png" width="256">
 
 ***Games pictured in order:*** PONG, BREAKOUT, BRIX, INVADERS, CONNECT4
+
+***
+
+### More info
 
 This being my first emulation project, do not expect it to be 100% functional. The following list explains what still needs to be fixed or implemented.
 
